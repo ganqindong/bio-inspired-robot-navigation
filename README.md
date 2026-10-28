@@ -2,8 +2,6 @@
 
 An archived team senior capstone project at the University of Cincinnati, exploring visual features alongside LiDAR-based boundary information in a hippocampal place-cell navigation framework.
 
-> **Archived implementation status:** The public branch contains visual feature extraction and a fusion module, but its current place-cell implementation does not read the fused vector assigned by the driver. This branch should not be treated as a verified end-to-end vision-LiDAR navigation implementation or an exact reproduction of the report's experiments. See [Known integration gap](#known-integration-gap).
-
 **Team:** Qindong Gan, Wentao Zhang, and Qiyanhui Lu.  
 **Faculty advisor:** Ali Minai.  
 **Project period:** 2024–2025.
