@@ -1,6 +1,8 @@
 # Bio-inspired Mapping and Navigation for Robots
 
-A team senior capstone project at the University of Cincinnati, extending a hippocampal place-cell navigation framework with visual features alongside LiDAR-based boundary information.
+An archived team senior capstone project at the University of Cincinnati, exploring visual features alongside LiDAR-based boundary information in a hippocampal place-cell navigation framework.
+
+> **Archived implementation status:** The public branch contains visual feature extraction and a fusion module, but its current place-cell implementation does not read the fused vector assigned by the driver. This branch should not be treated as a verified end-to-end vision-LiDAR navigation implementation or an exact reproduction of the report's experiments. See [Known integration gap](#known-integration-gap).
 
 **Team:** Qindong Gan, Wentao Zhang, and Qiyanhui Lu.  
 **Faculty advisor:** Ali Minai.  
@@ -20,13 +22,21 @@ The inherited README also cites the authors' 2022 IJCNN paper, *Context-Dependen
 
 ## Project and contribution scope
 
-The capstone adds an image-feature pathway to an existing navigation model with boundary-vector, head-direction, place-cell, and reward-cell components. The archived visual implementation uses ImageNet-pretrained EfficientNetV2B0 features and an autoencoder-derived fusion layer to combine vision with LiDAR-based representations.
+The capstone explored adding an image-feature pathway to an existing navigation model with boundary-vector, head-direction, place-cell, and reward-cell components. The archived branch contains ImageNet-pretrained EfficientNetV2B0 feature extraction and an autoencoder-derived module that computes fused visual and LiDAR-based representations. The current branch does not establish that these fused representations affect place-cell activity or navigation; the integration gap below remains unresolved.
 
 Qindong contributed to the vision pipeline, feature extraction and evaluation, literature review, and team coordination/progress reporting. The final report assigns overall navigation-model integration and fusion-layer development primarily to Wentao Zhang. Other team contributions remain part of the shared project; files are not attributed solely by which account hosts this fork.
 
 In the archived `visual_output.py`, EfficientNetV2B0 is loaded pretrained and frozen. This should not be described as training that backbone from scratch. The separate `autoencoder.py` trains the fusion encoder. These are distinct parts of the pipeline.
 
 The report describes limited improvements in some spatial representations and persistent perceptual aliasing in symmetric environments. This repository does not establish general navigation superiority, robust real-world deployment, or a new independent implementation of the foundational place-cell model.
+
+## Known integration gap
+
+In [the archived driver](https://github.com/ganqindong/bio-inspired-robot-navigation/blob/7d2e93f571dccb746c459a059f49a95e69808094/vision/visualizations/webots/controllers/create3_base/driver.py#L427-L442), the computed fused vector is assigned to `self.pcn.fusion_features` before calling `get_place_cell_activations`. However, [the corresponding place-cell implementation](https://github.com/ganqindong/bio-inspired-robot-navigation/blob/7d2e93f571dccb746c459a059f49a95e69808094/vision/visualizations/core/layers/place_cell_layer.py#L169-L180) does not read that attribute. It computes BVC activity from distances and uses those BVC activations for place-cell input.
+
+A small isolated check of this class, with identical network state and distance inputs and learning disabled, produced identical place-cell outputs over five updates despite substantially different assigned `fusion_features` values. This check did not run Webots, evaluate saved checkpoints, or reproduce navigation experiments.
+
+This finding concerns the currently published implementation. It does not determine which code or saved model was used for the historical report's experiments, or establish that those results are invalid. Matching historical code and run records are still needed. The archived algorithm has been preserved without wiring in a new fusion pathway or presenting a later repair as the historical implementation.
 
 ## Where to start
 
@@ -36,7 +46,7 @@ The default branch is `senior_design_vision`. The project is nested under `visio
 | --- | --- |
 | [Original project README](vision/README.md) | Inherited model overview, citation, and environment notes |
 | [Controller entry](vision/visualizations/webots/controllers/create3_base/create3_base.py) | Selects a robot mode and initializes the Webots driver |
-| [Driver](vision/visualizations/webots/controllers/create3_base/driver.py) | Connects sensors, neural layers, visual features, and navigation |
+| [Driver](vision/visualizations/webots/controllers/create3_base/driver.py) | Sensor and navigation controller with a visual pathway; see the integration gap above |
 | [Visual features](vision/visualizations/webots/controllers/create3_base/visual_output.py) | Frozen TensorFlow/Keras EfficientNetV2B0 feature extraction |
 | [Fusion](vision/visualizations/webots/controllers/create3_base/fusion_layer.py) | Combines visual and boundary-vector features using encoder weights |
 | [Fusion training](vision/visualizations/webots/controllers/create3_base/autoencoder.py) | Trains the fusion encoder from stored feature vectors |
